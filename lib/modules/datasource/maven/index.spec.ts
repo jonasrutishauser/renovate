@@ -353,6 +353,50 @@ describe('modules/datasource/maven/index', () => {
     expect(res?.sourceUrl).toBe('https://github.com/example/test');
   });
 
+  describe('supports relocation', () => {
+    it('with only groupId present', async () => {
+      const pom = Fixtures.get('pom.relocation.xml');
+      mockGenericPackage({ pom, html: null });
+
+      const res = await get();
+
+      expect(res?.replacementName).toBe('io.example:package');
+      expect(res?.replacementVersion).toBe('2.0.0');
+      expect(res?.deprecationMessage).toBeUndefined();
+    });
+
+    it('with only artifactId present', async () => {
+      const pom = Fixtures.get('pom.relocation.xml').replace(
+        '<groupId>io.example</groupId>',
+        '<artifactId>foo</artifactId>',
+      );
+      mockGenericPackage({ pom, html: null });
+
+      const res = await get();
+
+      expect(res?.replacementName).toBe('org.example:foo');
+      expect(res?.replacementVersion).toBe('2.0.0');
+      expect(res?.deprecationMessage).toBeUndefined();
+    });
+
+    it('with all elments present', async () => {
+      const pom = Fixtures.get('pom.relocation.xml').replace(
+        '<groupId>io.example</groupId>',
+        `<groupId>io.example</groupId>
+      <artifactId>foo</artifactId>
+      <version>1.2.3</version>
+      <message>test relocation</message>`,
+      );
+      mockGenericPackage({ pom, html: null });
+
+      const res = await get();
+
+      expect(res?.replacementName).toBe('io.example:foo');
+      expect(res?.replacementVersion).toBe('1.2.3');
+      expect(res?.deprecationMessage).toBe('test relocation');
+    });
+  });
+
   it('removes authentication header after redirect', async () => {
     const frontendHost = 'frontend_for_private_s3_repository';
     const frontendUrl = `https://${frontendHost}/maven2`;
