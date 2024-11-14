@@ -355,7 +355,14 @@ describe('modules/datasource/maven/index', () => {
 
   describe('supports relocation', () => {
     it('with only groupId present', async () => {
-      const pom = Fixtures.get('pom.relocation.xml');
+      const pom = `
+<project>
+  <distributionManagement>
+    <relocation>
+      <groupId>io.example</groupId>
+    </relocation>
+  </distributionManagement>
+</project>`;
       mockGenericPackage({ pom, html: null });
 
       const res = await get();
@@ -366,10 +373,14 @@ describe('modules/datasource/maven/index', () => {
     });
 
     it('with only artifactId present', async () => {
-      const pom = Fixtures.get('pom.relocation.xml').replace(
-        '<groupId>io.example</groupId>',
-        '<artifactId>foo</artifactId>',
-      );
+      const pom = `
+<project>
+  <distributionManagement>
+    <relocation>
+      <artifactId>foo</artifactId>
+    </relocation>
+  </distributionManagement>
+</project>`;
       mockGenericPackage({ pom, html: null });
 
       const res = await get();
@@ -380,13 +391,17 @@ describe('modules/datasource/maven/index', () => {
     });
 
     it('with all elments present', async () => {
-      const pom = Fixtures.get('pom.relocation.xml').replace(
-        '<groupId>io.example</groupId>',
-        `<groupId>io.example</groupId>
+      const pom = `
+<project>
+  <distributionManagement>
+    <relocation>
+      <groupId>io.example</groupId>
       <artifactId>foo</artifactId>
       <version>1.2.3</version>
-      <message>test relocation</message>`,
-      );
+      <message>test relocation</message>
+    </relocation>
+  </distributionManagement>
+</project>`;
       mockGenericPackage({ pom, html: null });
 
       const res = await get();
